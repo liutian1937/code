@@ -1,0 +1,174 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Timer</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2, minimum-scale=1" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<style type="text/css">
+	body{font-size:12px;margin:0px;background:#fff;}
+	.wrap{position:absolute;top:0px;left:0px;width:540px;height:337px;background:url(./img/bg.png) no-repeat;}
+	#content{resize:none;position:absolute;top:50px;left:19px;width:339px;height:236px;}
+	#btarea{position:absolute;top:295px;left:19px;width:339px;height:22px;line-height:22px;}
+	.cb{position:absolute;top:45px;left:374px;width:154px;height:57px;background:url(#);border:none;cursor:pointer}
+	#result{position:absolute;width:150px;height:204px;left:376px;top:47px;}
+	.news{color:green}
+	a{color:green}
+	a:hover{color:#3366ff}
+	a:visited{color:green}
+	#copyright{position:absolute;width:150px;height:17px;left:376px;top:301px;border:1px solid #f1f1f1;line-height:17px;text-align:center;}
+</style>
+
+<body>
+	<div id="wrap" class="wrap">
+		<textarea id="content"></textarea>
+		<div id="btarea">
+			<div class="flexbt">清除内容</div>
+			<div class="flexbt">去首尾空白</div>
+			<div class="flexbt">去所有换行</div>
+		</div>
+		<div id="result">统计结果<br/><br/>未开始<br/><br/>请在左侧文本框中输入内容，点击上方[开始统计]按钮。</div>
+	</div>
+	
+<script type="text/javascript">
+var ua = navigator.userAgent.toLowerCase();
+
+var isStrict = document.compatMode == "CSS1Compat",
+    isOpera = ua.indexOf("opera") > -1,
+    isSafari = (/webkit|khtml/).test(ua),
+    isSafari3 = isSafari && ua.indexOf('webkit/5') != -1,
+    isIE = !isOpera && ua.indexOf("msie") > -1,
+    isIE7 = !isOpera && ua.indexOf("msie 7") > -1,
+    isGecko = !isSafari && ua.indexOf("gecko") > -1,
+    isBorderBox = isIE && !isStrict,
+    isWindows = (ua.indexOf("windows") != -1 || ua.indexOf("win32") != -1),
+    isMac = (ua.indexOf("macintosh") != -1 || ua.indexOf("mac os x") != -1),
+    isAir = (ua.indexOf("adobeair") != -1),
+    isLinux = (ua.indexOf("linux") != -1),
+    isSecure = window.location.href.toLowerCase().indexOf("https") === 0;
+
+	function $(id){return document.getElementById(id);}
+	function trim(s){return s.replace(/^\s+|\s+$/g,"");}
+	function st(silent){
+		var c=$("content");
+		//if(c.value.length){
+			var cvalue=c.value.replace(/\r\n/g,"\n");
+			var sarr=cvalue.split("");
+			var len_total=sarr.length;
+			var r={
+				"wd":0,
+				"nwd":0,
+				"c":0,
+				"cb":0,
+				"r":0,
+				"en":0,
+				"cn":0,
+				"bl":0
+			};
+			var words=cvalue.match(/\b\w+\b/g)||[];
+			var cnwords=cvalue.match(/[\u4e00-\u9fa5]/g)||[];
+			r.nwd=words.length;
+			r.cn=cnwords.length;
+			for(var i=0;i<len_total;i++){
+				r.c++;
+				switch(true){
+					case /[a-zA-Z]/.test(sarr[i]):
+						r.en++;
+						break;
+					case /\S/.test(sarr[i]):
+						r.cb++;
+						break;
+					case /\s/.test(sarr[i]):
+						if(sarr[i]=="\n"||sarr[i]=="\r"){
+							r.r++;
+						}else{
+							r.bl++;
+						}
+				}
+			}
+			r.wd=r.nwd+r.cn;
+			var str="统计结果<br/><br/>";
+			str+="<table cellpadding='0' cellspacing='0' width='100%'>";
+			str+="<tr><td algin='left'>总字符数目:</td><td align='right'>"+(r.c-r.r)+"</td></tr>";
+			str+="<tr><td algin='left'>总字符(不含空白)数目:</td><td align='right'>"+(r.c-r.bl-r.r)+"</td></tr>";
+			str+="<tr><td algin='left'>空白字符数目:</td><td align='right'>"+r.bl+"</td></tr>";
+			str+="<tr><td algin='left'>英文字符数目:</td><td align='right'>"+r.en+"</td></tr>";
+			str+="<tr><td algin='left'>其它字符数目:</td><td align='right'>"+(r.c-r.en-r.bl-r.cn-r.r)+"</td></tr>";
+			str+="<tr><td algin='left'>&nbsp;</td><td align='right'>&nbsp;</td></tr>";
+			str+="<tr><td algin='left'>中英文单词数:</td><td align='right'>"+r.wd+"</td></tr>";
+			str+="<tr><td algin='left'>中文字数:</td><td align='right'>"+r.cn+"</td></tr>";
+			str+="<tr><td algin='left'>英文单词数:</td><td align='right'>"+r.nwd+"</td></tr>";
+			str+="<tr><td algin='left'>&nbsp;</td><td align='right'>&nbsp;</td></tr>";
+			str+="<tr><td algin='left'>行数:</td><td align='right'>"+(r.r+1)+"</td></tr>";
+			str+="</table>";
+			$("result").innerHTML=str;
+		//}else{
+		//	if(!silent){
+		//		alert("请输入内容，再开始统计");
+		//	}
+		//}
+	}
+	function setClass (obj,className){
+		if((typeof obj).toLowerCase()=="string"){
+			obj=$(obj);
+		}
+		if(isIE){
+			obj.className=className;
+		}else{
+			obj.setAttribute("class",className);
+		}
+	}
+	var funcs=[
+		function(){
+			$("content").value="";
+		},
+		function(){
+			$("content").value=trim($("content").value);
+		},
+		function(){
+			$("content").value=$("content").value.replace(/[\r\n]/g,"");
+		}
+	];
+	window.onload=function(){
+		var cwidth=document.documentElement.clientWidth;
+		$("wrap").style.left=parseInt((cwidth-540)/2)+"px";
+		/*$('cb').onmouseover=function(){
+			setClass("wrap","wrap_over");
+		};
+		$('cb').onmouseout=function(){
+			setClass("wrap","wrap");
+		};*/
+		var divs=$("btarea").getElementsByTagName("div");
+		var dl=divs.length;
+		for(var i=0;i<dl;i++){
+			(function  (i){
+				divs[i].onmouseover=function(){
+					setClass(this,"flexbt_over");
+				};
+				divs[i].onmouseout=function(){
+					setClass(this,"flexbt");
+				};
+				divs[i].onclick=function(){
+					funcs[i]();
+				};
+			})(i)
+		}
+		try{
+			if(isIE){
+				//IE
+				$("content").onpropertychange=function(){
+					st(true);
+				};
+			}else{
+				//other browser
+				$("content").oninput=function(){
+					st(true);
+				};
+			}
+		}catch(e){}
+	}
+</script>
+
+</body>
+</html>
