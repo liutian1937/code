@@ -459,9 +459,9 @@ Timer = {
 	},
 	move : function (t) {
 		var rotate = 0.1*t, height = t/12;
-		//Timer.result = Math.floor(height);
+		Timer.result = Math.floor(height);
 		Timer.circleStyle[Timer.transform] = 'rotate('+rotate+'deg)';
-		//Timer.dragStyle[Timer.transform] = 'translate(0,'+height+'px)';
+		Timer.dragStyle[Timer.transform] = 'translate(0,'+height+'px)';
 	},
 	translate : function (y){
 		if(!Timer.dragStyle){
