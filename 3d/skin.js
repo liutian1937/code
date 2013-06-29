@@ -1,7 +1,7 @@
 // Garden Gnome Software - Skin
 // Pano2VR pro 4.1.0/3405MS
 // Filename: myskin.ggsk
-// Generated 星期六 六月 29 13:34:42 2013
+// Generated 星期六 六月 29 14:08:48 2013
 
 function pano2vrSkin(player,base) {
 	var me=this;
@@ -120,6 +120,29 @@ function pano2vrSkin(player,base) {
 		this._pic__img['ondragstart']=function() { return false; };
 		me.player.checkLoaded.push(this._pic__img);
 		this._pic.appendChild(this._pic__img);
+		this._pic.onclick=function () {
+			if (me.player.transitionsDisabled) {
+				me.__1.style[domTransition]='none';
+			} else {
+				me.__1.style[domTransition]='all 1000ms ease-out 0ms';
+			}
+			me.__1.ggParameter.rx=0;me.__1.ggParameter.ry=0;
+			me.__1.style[domTransform]=parameterToTransform(me.__1.ggParameter);
+			if (me.player.transitionsDisabled) {
+				me._btn4.style[domTransition]='none';
+			} else {
+				me._btn4.style[domTransition]='all 500ms ease-out 0ms';
+			}
+			me._btn4.style.opacity='1';
+			me._btn4.style.visibility=me._btn4.ggVisible?'inherit':'hidden';
+			if (me.player.transitionsDisabled) {
+				me._btn5.style[domTransition]='none';
+			} else {
+				me._btn5.style[domTransition]='all 500ms ease-out 0ms';
+			}
+			me._btn5.style.opacity='0';
+			me._btn5.style.visibility='hidden';
+		}
 		this.__1.appendChild(this._pic);
 		this._btn4=document.createElement('div');
 		this._btn4.ggId='btn4';
