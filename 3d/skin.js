@@ -1,7 +1,7 @@
 // Garden Gnome Software - Skin
 // Pano2VR pro 4.1.0/3405MS
 // Filename: myskin.ggsk
-// Generated 星期六 六月 29 12:32:10 2013
+// Generated 星期六 六月 29 12:53:06 2013
 
 function pano2vrSkin(player,base) {
 	var me=this;
@@ -98,14 +98,14 @@ function pano2vrSkin(player,base) {
 		hs+='width: 400px;';
 		hs+='height: 237px;';
 		hs+=cssPrefix + 'transform-origin: 50% 50%;';
-		hs+='opacity: 0.7;';
+		hs+='opacity: 0.9;';
 		hs+='visibility: inherit;';
 		this.__1.setAttribute('style',hs);
-		this.__2=document.createElement('div');
-		this.__2.ggId='\u56fe\u7247 2';
-		this.__2.ggParameter={ rx:0,ry:0,a:0,sx:1,sy:1 };
-		this.__2.ggVisible=true;
-		this.__2.className='ggskin ggskin_image';
+		this._pic=document.createElement('div');
+		this._pic.ggId='pic';
+		this._pic.ggParameter={ rx:0,ry:0,a:0,sx:1,sy:1 };
+		this._pic.ggVisible=true;
+		this._pic.className='ggskin ggskin_image';
 		hs ='position:absolute;';
 		hs+='left: 0px;';
 		hs+='top:  1px;';
@@ -113,19 +113,19 @@ function pano2vrSkin(player,base) {
 		hs+='height: 234px;';
 		hs+=cssPrefix + 'transform-origin: 50% 50%;';
 		hs+='visibility: inherit;';
-		this.__2.setAttribute('style',hs);
-		this.__2__img=document.createElement('img');
-		this.__2__img.setAttribute('src',basePath + 'images/_2.png');
-		this.__2__img.setAttribute('style','position: absolute;top: 0px;left: 0px;-webkit-user-drag:none;');
-		this.__2__img['ondragstart']=function() { return false; };
-		me.player.checkLoaded.push(this.__2__img);
-		this.__2.appendChild(this.__2__img);
-		this.__1.appendChild(this.__2);
-		this.__4=document.createElement('div');
-		this.__4.ggId='\u6309\u94ae 4';
-		this.__4.ggParameter={ rx:0,ry:0,a:0,sx:1,sy:1 };
-		this.__4.ggVisible=true;
-		this.__4.className='ggskin ggskin_button';
+		this._pic.setAttribute('style',hs);
+		this._pic__img=document.createElement('img');
+		this._pic__img.setAttribute('src',basePath + 'images/pic.png');
+		this._pic__img.setAttribute('style','position: absolute;top: 0px;left: 0px;-webkit-user-drag:none;');
+		this._pic__img['ondragstart']=function() { return false; };
+		me.player.checkLoaded.push(this._pic__img);
+		this._pic.appendChild(this._pic__img);
+		this.__1.appendChild(this._pic);
+		this._btn4=document.createElement('div');
+		this._btn4.ggId='btn4';
+		this._btn4.ggParameter={ rx:0,ry:0,a:0,sx:1,sy:1 };
+		this._btn4.ggVisible=true;
+		this._btn4.className='ggskin ggskin_button';
 		hs ='position:absolute;';
 		hs+='left: 335px;';
 		hs+='top:  91px;';
@@ -134,14 +134,14 @@ function pano2vrSkin(player,base) {
 		hs+=cssPrefix + 'transform-origin: 50% 50%;';
 		hs+='visibility: inherit;';
 		hs+='cursor: pointer;';
-		this.__4.setAttribute('style',hs);
-		this.__4__img=document.createElement('img');
-		this.__4__img.setAttribute('src',basePath + 'images/_4.png');
-		this.__4__img.setAttribute('style','position: absolute;top: 0px;left: 0px;-webkit-user-drag:none;');
-		this.__4__img['ondragstart']=function() { return false; };
-		me.player.checkLoaded.push(this.__4__img);
-		this.__4.appendChild(this.__4__img);
-		this.__4.onclick=function () {
+		this._btn4.setAttribute('style',hs);
+		this._btn4__img=document.createElement('img');
+		this._btn4__img.setAttribute('src',basePath + 'images/btn4.png');
+		this._btn4__img.setAttribute('style','position: absolute;top: 0px;left: 0px;-webkit-user-drag:none;');
+		this._btn4__img['ondragstart']=function() { return false; };
+		me.player.checkLoaded.push(this._btn4__img);
+		this._btn4.appendChild(this._btn4__img);
+		this._btn4.onclick=function () {
 			if (me.player.transitionsDisabled) {
 				me.__1.style[domTransition]='none';
 			} else {
@@ -150,26 +150,26 @@ function pano2vrSkin(player,base) {
 			me.__1.ggParameter.rx=334;me.__1.ggParameter.ry=0;
 			me.__1.style[domTransform]=parameterToTransform(me.__1.ggParameter);
 			if (me.player.transitionsDisabled) {
-				me.__4.style[domTransition]='none';
+				me._btn4.style[domTransition]='none';
 			} else {
-				me.__4.style[domTransition]='all 500ms ease-out 0ms';
+				me._btn4.style[domTransition]='all 500ms ease-out 0ms';
 			}
-			me.__4.style.opacity='0';
-			me.__4.style.visibility='hidden';
+			me._btn4.style.opacity='0';
+			me._btn4.style.visibility='hidden';
 			if (me.player.transitionsDisabled) {
-				me.__50.style[domTransition]='none';
+				me._btn5.style[domTransition]='none';
 			} else {
-				me.__50.style[domTransition]='all 500ms ease-out 0ms';
+				me._btn5.style[domTransition]='all 500ms ease-out 0ms';
 			}
-			me.__50.style.opacity='1';
-			me.__50.style.visibility=me.__50.ggVisible?'inherit':'hidden';
+			me._btn5.style.opacity='1';
+			me._btn5.style.visibility=me._btn5.ggVisible?'inherit':'hidden';
 		}
-		this.__1.appendChild(this.__4);
-		this.__50=document.createElement('div');
-		this.__50.ggId='\u6309\u94ae 5';
-		this.__50.ggParameter={ rx:0,ry:0,a:0,sx:1,sy:1 };
-		this.__50.ggVisible=true;
-		this.__50.className='ggskin ggskin_button';
+		this.__1.appendChild(this._btn4);
+		this._btn5=document.createElement('div');
+		this._btn5.ggId='btn5';
+		this._btn5.ggParameter={ rx:0,ry:0,a:0,sx:1,sy:1 };
+		this._btn5.ggVisible=true;
+		this._btn5.className='ggskin ggskin_button';
 		hs ='position:absolute;';
 		hs+='left: 0px;';
 		hs+='top:  91px;';
@@ -179,14 +179,14 @@ function pano2vrSkin(player,base) {
 		hs+='opacity: 0;';
 		hs+='visibility: hidden;';
 		hs+='cursor: pointer;';
-		this.__50.setAttribute('style',hs);
-		this.__50__img=document.createElement('img');
-		this.__50__img.setAttribute('src',basePath + 'images/_50.png');
-		this.__50__img.setAttribute('style','position: absolute;top: 0px;left: 0px;-webkit-user-drag:none;');
-		this.__50__img['ondragstart']=function() { return false; };
-		me.player.checkLoaded.push(this.__50__img);
-		this.__50.appendChild(this.__50__img);
-		this.__50.onclick=function () {
+		this._btn5.setAttribute('style',hs);
+		this._btn5__img=document.createElement('img');
+		this._btn5__img.setAttribute('src',basePath + 'images/btn5.png');
+		this._btn5__img.setAttribute('style','position: absolute;top: 0px;left: 0px;-webkit-user-drag:none;');
+		this._btn5__img['ondragstart']=function() { return false; };
+		me.player.checkLoaded.push(this._btn5__img);
+		this._btn5.appendChild(this._btn5__img);
+		this._btn5.onclick=function () {
 			if (me.player.transitionsDisabled) {
 				me.__1.style[domTransition]='none';
 			} else {
@@ -195,71 +195,71 @@ function pano2vrSkin(player,base) {
 			me.__1.ggParameter.rx=0;me.__1.ggParameter.ry=0;
 			me.__1.style[domTransform]=parameterToTransform(me.__1.ggParameter);
 			if (me.player.transitionsDisabled) {
-				me.__50.style[domTransition]='none';
+				me._btn5.style[domTransition]='none';
 			} else {
-				me.__50.style[domTransition]='all 500ms ease-out 0ms';
+				me._btn5.style[domTransition]='all 500ms ease-out 0ms';
 			}
-			me.__50.style.opacity='0';
-			me.__50.style.visibility='hidden';
+			me._btn5.style.opacity='0';
+			me._btn5.style.visibility='hidden';
 			if (me.player.transitionsDisabled) {
-				me.__4.style[domTransition]='none';
+				me._btn4.style[domTransition]='none';
 			} else {
-				me.__4.style[domTransition]='all 500ms ease-out 0ms';
+				me._btn4.style[domTransition]='all 500ms ease-out 0ms';
 			}
-			me.__4.style.opacity='1';
-			me.__4.style.visibility=me.__4.ggVisible?'inherit':'hidden';
+			me._btn4.style.opacity='1';
+			me._btn4.style.visibility=me._btn4.ggVisible?'inherit':'hidden';
 		}
-		this.__1.appendChild(this.__50);
-		this.__5=document.createElement('div');
-		this.__5.ggId='\u6309\u94ae 5';
-		this.__5.ggParameter={ rx:0,ry:0,a:0,sx:0.7,sy:0.7 };
-		this.__5.ggVisible=true;
-		this.__5.className='ggskin ggskin_button';
+		this.__1.appendChild(this._btn5);
+		this._btn6=document.createElement('div');
+		this._btn6.ggId='btn6';
+		this._btn6.ggParameter={ rx:0,ry:0,a:0,sx:0.8,sy:0.8 };
+		this._btn6.ggVisible=true;
+		this._btn6.className='ggskin ggskin_button';
 		hs ='position:absolute;';
 		hs+='left: 166px;';
 		hs+='top:  44px;';
 		hs+='width: 42px;';
 		hs+='height: 54px;';
 		hs+=cssPrefix + 'transform-origin: 50% 50%;';
-		hs+=cssPrefix + 'transform: ' + parameterToTransform(this.__5.ggParameter) + ';';
+		hs+=cssPrefix + 'transform: ' + parameterToTransform(this._btn6.ggParameter) + ';';
 		hs+='visibility: inherit;';
 		hs+='cursor: pointer;';
-		this.__5.setAttribute('style',hs);
-		this.__5__img=document.createElement('img');
-		this.__5__img.setAttribute('src',basePath + 'images/_5.png');
-		this.__5__img.setAttribute('style','position: absolute;top: 0px;left: 0px;-webkit-user-drag:none;');
-		this.__5__img['ondragstart']=function() { return false; };
-		me.player.checkLoaded.push(this.__5__img);
-		this.__5.appendChild(this.__5__img);
-		this.__5.onclick=function () {
+		this._btn6.setAttribute('style',hs);
+		this._btn6__img=document.createElement('img');
+		this._btn6__img.setAttribute('src',basePath + 'images/btn6.png');
+		this._btn6__img.setAttribute('style','position: absolute;top: 0px;left: 0px;-webkit-user-drag:none;');
+		this._btn6__img['ondragstart']=function() { return false; };
+		me.player.checkLoaded.push(this._btn6__img);
+		this._btn6.appendChild(this._btn6__img);
+		this._btn6.onclick=function () {
 			me.player.openNext("b.xml","0\/0\/0");
 		}
-		this.__1.appendChild(this.__5);
-		this.__6=document.createElement('div');
-		this.__6.ggId='\u6309\u94ae 6';
-		this.__6.ggParameter={ rx:0,ry:0,a:0,sx:0.7,sy:0.7 };
-		this.__6.ggVisible=true;
-		this.__6.className='ggskin ggskin_button';
+		this.__1.appendChild(this._btn6);
+		this._btn7=document.createElement('div');
+		this._btn7.ggId='btn7';
+		this._btn7.ggParameter={ rx:0,ry:0,a:0,sx:0.8,sy:0.8 };
+		this._btn7.ggVisible=true;
+		this._btn7.className='ggskin ggskin_button';
 		hs ='position:absolute;';
 		hs+='left: 22px;';
 		hs+='top:  115px;';
 		hs+='width: 42px;';
 		hs+='height: 54px;';
 		hs+=cssPrefix + 'transform-origin: 50% 50%;';
-		hs+=cssPrefix + 'transform: ' + parameterToTransform(this.__6.ggParameter) + ';';
+		hs+=cssPrefix + 'transform: ' + parameterToTransform(this._btn7.ggParameter) + ';';
 		hs+='visibility: inherit;';
 		hs+='cursor: pointer;';
-		this.__6.setAttribute('style',hs);
-		this.__6__img=document.createElement('img');
-		this.__6__img.setAttribute('src',basePath + 'images/_6.png');
-		this.__6__img.setAttribute('style','position: absolute;top: 0px;left: 0px;-webkit-user-drag:none;');
-		this.__6__img['ondragstart']=function() { return false; };
-		me.player.checkLoaded.push(this.__6__img);
-		this.__6.appendChild(this.__6__img);
-		this.__6.onclick=function () {
+		this._btn7.setAttribute('style',hs);
+		this._btn7__img=document.createElement('img');
+		this._btn7__img.setAttribute('src',basePath + 'images/btn7.png');
+		this._btn7__img.setAttribute('style','position: absolute;top: 0px;left: 0px;-webkit-user-drag:none;');
+		this._btn7__img['ondragstart']=function() { return false; };
+		me.player.checkLoaded.push(this._btn7__img);
+		this._btn7.appendChild(this._btn7__img);
+		this._btn7.onclick=function () {
 			me.player.openNext("a.xml","0\/0\/0");
 		}
-		this.__1.appendChild(this.__6);
+		this.__1.appendChild(this._btn7);
 		this.divSkin.appendChild(this.__1);
 		this.divSkin.ggUpdateSize=function(w,h) {
 			me.updateSize(me.divSkin);
