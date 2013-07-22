@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>html</title>
+<body>
+
+<textarea id="textarea1" value="" style="width:400px;height:300px;"></textarea><br/>
+<input type="button" value="encode" onclick="encode()" />
+<input type="button" value="decode" onclick="decode()" /><br/>
+<textarea id="textarea2" value="" style="width:400px;height:300px;"></textarea><br/>
+<pre id="result"></pre>
+
+<textarea id="textarea1" value="" style="width:400px;height:300px;display:none;"></textarea>
+
+<script>
+var textarea1 = document.getElementById('textarea1'), 
+	textarea2 = document.getElementById('textarea2'),
+	result = document.getElementById('result');
+
+
+function transcode(type,val){
+	var elem = document.createElement ("div"), ret;
+	(type === 'encode') ? (function(){
+		 (elem.textContent != null) ? (elem.textContent = val) : (elem.innerText = val);
+		 ret = elem.innerHTML;
+		 elem = null;
+	})() : (function(){
+		elem.innerHTML = val;   
+		ret = elem.innerText || elem.textContent;
+		temp = null;
+	})();
+	return ret;
+};
+
+function encode(){
+	var code = transcode('encode',textarea1.value);
+	//result.innerHTML = code;
+	textarea2.value = code;
+}
+function decode(){
+	var code = transcode('decode',textarea2.value);
+	//result.innerHTML = code;
+	textarea1.value = code;
+}
+</script>
+
+</body>
+</html>

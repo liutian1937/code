@@ -1,0 +1,45 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>html</title>
+<body>
+	
+	<input type="file" id="ImgInput" multiple accept="image/*" />
+	
+	<script>
+		var img = document.getElementById('ImgInput');
+		img.onchange = function(){
+			var i = 0, len = img.files.length, arr = [];
+			
+			
+			if(typeof FileReader === 'undefined'){
+				console.log('不支持二进制读取');
+				return false;
+			}else{
+				var reader = new FileReader();
+				
+				for(; i < len; i += 1){
+					if(!/image\/\w+/.test(img.files[i].type)){
+						alert ('非图像格式');
+						return false;
+					}
+					
+					
+					(function(j){
+						arr[j] = reader.readAsDataURL(img.files[j]);
+						arr[j].onload = function(){
+							document.body.innerHTML += '<img src="'+this.result+'">';
+						}
+					})(i);
+					0
+				}
+				
+				
+			}
+			console.log(file.type);
+		}
+	</script>
+	
+</body>
+</html>
