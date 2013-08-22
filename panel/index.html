@@ -7,7 +7,7 @@
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600' rel='stylesheet' type='text/css'>
 <link rel="stylesheet" href="./fontcss/font-awesome.min.css">
 <style>
-body,ul,li,ol,h1,h2,h3,h4{margin:0;padding:0;}
+body,ul,li,ol,h1,h2,h3,h4,h5{margin:0;padding:0;}
 ul{list-style:none;}
 a{text-decoration:none;}
 /*position*/
@@ -16,10 +16,13 @@ a{text-decoration:none;}
 
 .pz-g {letter-spacing: -0.31em;*letter-spacing: normal;*word-spacing: -0.43em;}
 .pz-u {display: inline-block;zoom: 1; *display: inline;letter-spacing: normal;word-spacing: normal;vertical-align: top;}
+textare, input{display:inline-block;height:20px;padding:4px 6px;margin-bottom:10px;line-height:20px;color:#555555;vertical-align:middle;}
+textarea, input{background-color:#ffffff;border:1px solid #cccccc;-webkit-box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.075);-moz-box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.075);box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.075);-webkit-transition:border linear .2s, box-shadow linear .2s;-moz-transition:border linear .2s, box-shadow linear .2s;-o-transition:border linear .2s, box-shadow linear .2s;transition:border linear .2s, box-shadow linear .2s;}
+textarea:focus,input:focus{border-color:rgba(82, 168, 236, 0.8);outline:0;outline:thin dotted \9;-webkit-box-shadow:inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);-moz-box-shadow:inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);box-shadow:inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);}
 </style>
 <style>
 body{font-weight:100;font-size:12px;background:url(images/bg.png) repeat;}
-h1,h2,h3,h4{font-weight:100;font-size:100%;}
+h1,h2,h3,h4,h5{font-weight:100;font-size:100%;}
 .sans{font-family: 'Open Sans', sans-serif;}
 .yahei{font-family:"Microsoft YaHei",sans-serif;}
 .opacity{filter:alpha(opacity=70);opacity:0.7;}
@@ -27,6 +30,7 @@ h1,h2,h3,h4{font-weight:100;font-size:100%;}
 .clearfix:after{content:"";display:block;height:0;clear:both;visibility: hidden;overflow:hidden;}
 .clearfix{*zoom:1;}
 .animate{-webkit-transition:all 0.3s ease-out;-moz-transition:all 0.3s ease-out;-o-transition:all 0.3s ease-out;transition:all 0.3s ease-out;}
+.blue{color:#0866c6;}
 
 #header{background:#0866c6;height:110px;overflow:hidden;}
 .logo{width:260px;text-align:center;line-height:110px;font-weight:100;}
@@ -51,20 +55,32 @@ h1,h2,h3,h4{font-weight:100;font-size:100%;}
 
 #wraper{background:url(images/leftbg.png) 0 0 repeat-y;}
 .wraperNav{width:260px;}
-.wraperNav h3{color:#ddd;background:#232323;text-transform:uppercase;padding:7px 30px;font-size:14px;letter-spacing:2px;}
+.wraperNav h3{color:#ddd;background:#232323;text-transform:uppercase;padding-left:30px;height:30px;line-height:30px;font-size:14px;letter-spacing:2px;}
 .wraperNav ul{list-style:none;border-top:1px solid #222;}
 .wraperNav ul li a{padding:10px 0px 10px 30px;border-bottom:1px solid #222;color:#999;display:block;font-size:14px;letter-spacing:2px;-webkit-transition:all 0.3s ease-out;-moz-transition:all 0.3s ease-out;-o-transition:all 0.3s ease-out;transition:all 0.3s ease-out;letter-spacing:2px;}
-.wraperNav ul li i{margin-right:20px;}
+.wraperNav ul li i{margin-right:20px;vertical-align:text-bottom;}
 .wraperNav ul li a:hover{background:#2c2c2c;color:#fff;border-bottom-color:#222;}
 .wraperNav ul li.active > a{background:#0866c6;color:#fff;border-bottom-color:rgba(0,0,0,0.2);}
 
-.wraperNav ul li.dropdown .f-r{font-size:16px;}
+.wraperNav ul li.dropdown .f-r{font-size:16px;margin-top:2px;}
 .wraperNav ul li.dropdown ul{background:#eee;}
 .wraperNav ul li.dropdown ul li a{border-right:1px solid #ddd;border-bottom:1px solid #ddd;color:#666;padding-left:35px;}
 .wraperNav ul li.dropdown ul li a:hover,.wraperNav ul li.dropdown .active a{background:#fff;color:#333;}
 
 .wraperBody{margin-left:260px;}
+.breadCrumbs{height:30px;background:#ddd;border-bottom:1px solid #ccc;line-height:30px;color:#666;}
+.breadCrumbs .blue{margin-left:10px;}
+.breadCrumbs i{font-size:16px;vertical-align:text-bottom;margin:0px 3px;}
+.breadCrumbs a{color:#666;margin:0px 3px;}
+.breadCrumbs a:hover{color:#0866c6;}
 
+.pageHeader{background:#fff;padding:20px;border-bottom:1px solid #ddd;min-height:68px;color:#999;}
+.pageHeader .pageTitle i{font-size:350%;display:inline-block;padding:10px;text-align:center;border:3px solid #0866c6;border-radius:100%;margin-right:15px;}
+.pageHeader .pageTitle h1{font-size:250%;fong-weight:300;}
+.pageHeader .pageTitle h5{padding-top:5px;}
+
+.pageHeader .searchBar{position:absolute;right:20px;height:40px;}
+.pageHeader .searchBar input{height:30px;line-height:30px;}
 </style>
 
 
@@ -118,7 +134,7 @@ h1,h2,h3,h4{font-weight:100;font-size:100%;}
 				<li><a href="dashboard.html"><i class="icon-laptop"></i>控制面板</a></li>
 				<li><a href="dashboard.html"><i class="icon-th-list"></i>栏目管理</a></li>
 				<li><a href="dashboard.html"><i class="icon-pencil"></i>文章管理</a></li>
-				<li><a href="dashboard.html"><i class="icon-user"></i>会员管理</a></li>
+				<li class="dropdown"><a href="dashboard.html"><i class="icon-user"></i>会员管理<i class="icon-circle-arrow-down f-r"></i></a></li>
 				<li class="dropdown active">
 					<a href="javascript:;"><i class="icon-unlock-alt"></i>权限管理<i class="icon-circle-arrow-down f-r"></i></a>
 					<ul>
@@ -133,7 +149,24 @@ h1,h2,h3,h4{font-weight:100;font-size:100%;}
 		</div>
 		
 		<div class="wraperBody">
-		dd
+			
+			<div class="breadCrumbs">
+				<i class="icon-home blue"></i>
+				<i class="icon-angle-right"></i>
+				<a href="#">控制面板</a>
+			</div>
+			
+			<div class="pageHeader">
+				<form action="/" method="post" class="searchBar f-r">
+					<input type="text" name="keyword" placeholder="keyword...">
+				</form>
+				<div class="pageTitle">
+					<i class="icon-laptop blue f-l"></i>
+					<h5>管理员控制面板</h5>
+					<h1 class="blue">Dashboard</h1>
+				</div>
+			</div>
+			
 		</div>
 		
 	</div>
