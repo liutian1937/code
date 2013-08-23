@@ -1,0 +1,183 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>html</title>
+<body>
+<style>
+dl{text-align:center;}
+</style>
+
+    <h2>Usage</h2>
+    <p>Use a placeholder image in the src attribute - something to be displayed while the original image loads - and include the actual image source in a "data-src" attribute.</p>
+    <p>If you want to serve high-resolution images to devices with retina displays, you just have to include the source for those images in a "data-src-retina" attribute.</p>
+    <p>You don't need to include a "data-src-retina" attribute in all the image tags, unveil is smart enough to fallback to "data-src" or even do nothing in case there isn't any "data-src" specified.</p>
+    <code>&lt;img <span class="blue">src=</span><span class="red">"bg.png"</span> <span class="blue">data-src=</span><span class="red">"img1.jpg"</span> /></code>
+    <br>
+    <code>&lt;img <span class="blue">src=</span><span class="red">"bg.png"</span> <span class="blue">data-src=</span><span class="red">"img2.jpg"</span> <span class="blue">data-src-retina=</span><span class="red">"img2-retina.jpg"</span> /></code>
+    <br>
+    <p>If you care about users without javascript enabled, you can include the original image inside a &lt;noscript&gt; tag:</p>
+    <code>&lt;noscript&gt;<br>&nbsp;&nbsp;&lt;img <span class="blue">src=</span><span class="red">"img1.jpg"</span> /><br>&lt;/noscript&gt;</code>
+    <br><br>
+    <p>Run the script on document ready:</p>
+    <code>$(<span class="blue">document</span>).ready(<span class="blue">function</span>() {<br>
+    &nbsp;&nbsp;$(<span class="red">"img"</span>).unveil();<br>
+    });</code>
+
+    <h2>Option</h2>
+    <p>By default, images are only loaded and "unveiled" when the user scrolls to them and they became visible on the screen.</p>
+    <p>If you want your images to load earlier than that, lets say 200px before they appear on the screen, you just have to:</p>
+    <code>$(<span class="red">"img"</span>).unveil(<span class="blue">200</span>);</code>
+
+    <h2>Trigger</h2>
+    <p>You can still trigger image loading whenever you need.</p>
+    <p>All you have to do is select the images you want to "unveil" and trigger the event:</p>
+    <code>$(<span class="red">"img"</span>).trigger(<span class="red">"unveil"</span>);</code>
+
+    <h2>Demo</h2>
+    <p>The images were taken from the The Fox is Black <a href="http://www.thefoxisblack.com/category/the-desktop-wallpaper-project/">Desktop Wallpaper Project</a> - cool stuff!</p>
+    <p>If you're on a "normal" display, unveil will load the low resolution version (800x500). In case you're on a device with a retina display, the high resolution version (1280x800 in this case) will be loaded instead.</p>
+    <p>Scroll down to see it working.</p>
+<dl id="wrap">
+	<dt>图片列表</dt>
+	<dd><img src="blank.jpg" data-src="http://img1.qunarzz.com/wugc/p138/201308/03/0071bcdc938fe88093835fbb.jpg_r_800x534x90_69d167cf.jpg"></dd>
+	<dd><img src="blank.jpg" data-src="http://img1.qunarzz.com/wugc/p155/201308/03/ee0021f8b4c6f40f93835fbb.jpg_r_800x533x90_4d3357f3.jpg"></dd>
+	<dd><img src="blank.jpg" data-src="http://img1.qunarzz.com/wugc/p19/201308/03/db370c486194b4de93835fbb.jpg_r_800x533x90_cc9573b9.jpg"></dd>
+	<dd><img src="blank.jpg" data-src="http://img1.qunarzz.com/wugc/p7/201308/03/8f1b35ebe5172fff93835fbb.jpg_r_800x533x90_e2440a29.jpg"></dd>
+	<dd><img src="blank.jpg" data-src="http://img1.qunarzz.com/wugc/p147/201308/03/58682db9d979d98893835fbb.jpg_r_800x533x90_b8fbf4e9.jpg"></dd>
+	<dd><img src="blank.jpg" data-src="http://img1.qunarzz.com/wugc/p179/201308/03/822682a3e424a8f093835fbb.jpg_r_800x512x90_82e4fbd1.jpg"></dd>
+	<dd><img src="blank.jpg" data-src="http://img1.qunarzz.com/wugc/p165/201308/03/87ca02480f58f97993835fbb.jpg_r_800x533x90_88db2069.jpg"></dd>
+	<dd><img src="blank.jpg" data-src="http://img1.qunarzz.com/wugc/p253/201308/03/1f5344ccfbad0e5393835fbb.jpg_r_800x533x90_a4dea531.jpg"></dd>
+	<dd><img src="blank.jpg" data-src="http://img1.qunarzz.com/wugc/p73/201308/03/801f6dccda92d1fd93835fbb.jpg_r_800x533x90_315b3820.jpg"></dd>
+</dl>
+
+<script>
+
+(function(){
+	var Unit = {
+		handleHash : {},
+		bind : (function() {
+			if (window.addEventListener) {
+				return function(el, type, fn, capture) {
+					el.addEventListener(type, function(){
+						fn();
+						Unit.handleHash[type] = Unit.handleHash[type] || [];
+						Unit.handleHash[type].push(arguments.callee);
+					}, capture);
+				};
+			} else if (window.attachEvent) {
+				return function(el, type, fn, capture) {
+					el.attachEvent("on" + type, function(){
+						fn();
+						Unit.handleHash[type] = Unit.handleHash[type] || [];
+						Unit.handleHash[type].push(arguments.callee);
+					});
+				};
+			}
+		})(),
+		unbind : (function(){
+			if (window.addEventListener) {
+				return function(el, type ) {
+					if(Unit.handleHash[type]){
+						var i = 0, len = Unit.handleHash[type].length;
+						for (i; i<len ; i += 1){
+							el.removeEventListener(type, Unit.handleHash[type][i]);
+						}
+					};
+				};
+			} else if (window.attachEvent) {
+				return function(el, type) {
+					if(Unit.handleHash[type]){
+						var i = 0, len = Unit.handleHash[type].length;
+						for (i; i<len ; i += 1){
+							el.detachEvent("on" + type, Unit.handleHash[type][i]);
+						}
+					};
+				};
+			}
+		})(),
+		pageY : function (elem) {
+			return elem.offsetParent ? (Unit.pageY(elem.offsetParent) + elem.offsetTop) : elem.offsetTop ;
+		},
+		pageX : function (elem) {
+			return elem.offsetParent ? (Unit.pageX(elem.offsetParent) + elem.offsetLeft) : elem.offsetLeft ;
+		},
+		windowSize : function() {
+			var w = 0, h = 0;
+			if (window.innerWidth && window.innerHeight) {
+				w = window.innerWidth;
+				h = window.innerHeight;
+			} else if (document.documentElement) {
+				w = document.documentElement.clientWidth;
+				h = document.documentElement.clientHeight;
+			} else if (document.body.clientWidth && document.body.clientHeight) {
+				w = document.body.clientWidth;
+				h = document.body.clientHeight;
+			}
+			return { width: w, height: h };
+		}
+	};
+	
+	var LazyImg = function () {
+		if( !(this instanceof LazyImg) ) {
+			return new LazyImg(arguments) ;
+		};
+		this.options = {
+			attr : 'data-src',
+			vertical : true
+		};
+		this.elem = arguments[0] || window ;
+		
+		if( arguments[1] ) {
+			for (var i in arguments[1]){
+				if ( this.options[i] ) {
+					this.options[i] = arguments[1][i];
+				} 
+			};
+		};
+		this.init();
+		this.scroll();
+	};
+	LazyImg.prototype.init =  function () {
+		var _this = this;
+		this.size = Unit.windowSize() ;
+		Unit.bind(window,'scroll',function(){
+			_this.scroll();
+		});
+	};
+	LazyImg.prototype.scroll = function () {
+		var _this = this, i = 0, len, src, top;
+		top = (document.body.scrollTop || document.documentElement.scrollTop) + _this.size['height'];
+		
+		if( !_this.imgArray ) {
+			_this.imgArray = document.getElementById('wrap').getElementsByTagName('img');
+			//_this.imgArray = _this.elem.getElementsByTagName('img');
+			len = _this.imgArray.length ;
+			for ( ; i < len; i += 1) {
+				src = _this.imgArray[i].getAttribute(_this.options.attr);
+				if( !src ){
+					_this.imgArray.splice(i,1);
+					return false;
+				};
+				
+			};
+		};
+		len = _this.imgArray.length ;
+		for (var j = 0 ; j < len; j += 1) {
+			var posY = Unit.pageY(_this.imgArray[j]);
+			if(posY < top) {
+				_this.imgArray[j].setAttribute('src',_this.imgArray[j].getAttribute(_this.options.attr));
+			}
+		};
+	};
+	window.LazyImg = LazyImg ;
+})();
+LazyImg(document.getElementById('wrap'));
+</script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	 <script src="http://luis-almeida.github.io/unveil/jquery.unveil.js"></script>
+
+
+</body>
+</html>
