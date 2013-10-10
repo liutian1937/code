@@ -17,7 +17,7 @@
 
 function Validator(frmname)
 {
-    this.validate_on_killfocus = false;
+    this.validate_on_killfocus = true;
     this.formobj = document.forms[frmname];
     if (!this.formobj)
     {
