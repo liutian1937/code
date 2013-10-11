@@ -3,8 +3,7 @@
 		together : false, //默认遇错误打断，显示单条错误信息
 		errShow : 'alert', //错误提示，默认为alert，支持字符串(alert,single,multiple),自定义function(string || array())
 		errBox : false, //错误消息div，默认不设置，为form表单中的 .error_strings
-		timely : false, //实时判断，是否失去焦点判断
-		ajax : false //是否采用ajax提交
+		timely : false //实时判断，是否失去焦点判断
 	}
     var Common = {
 		extend : function (from,to){
@@ -15,17 +14,59 @@
 			return obj;
 		},
         each : function (obj,fn) {
+            var ret;
             if(obj.constructor === Array){
                 for(var i = 0; i < obj.length; i += 1) {
-                    fn(i,obj[i]);
+                    ret = fn(i,obj[i]);
+                    if(ret == 'break'){
+                        return false;
+                    }
                 }
             }else if(typeof obj === 'object'){
                 for(var i in obj){
-                    fn(i,obj[i]);
+                    ret = fn(i,obj[i]);
+                    if(ret  == 'break'){
+                        return false;
+                    }
                 }
             }
         },
-		bind : (function() {
+        hasClass : function (element,value) {
+            var reg = new RegExp('(\\s|^)' + value + '(\\s|$)');
+            return element.className.match(reg);
+        },
+        insertAfter : function(newChild,refChild){
+            var parElem=refChild.parentNode;
+            if(parElem.lastChild==refChild){
+                refChild.appendChild(newChild);
+            }else{
+                parElem.insertBefore(newChild,refChild.nextSibling);
+            }
+        },
+        getErrBox : function (obj,tagname,classname) {
+            var boxList = obj.parentNode.getElementsByTagName(tagname), i = 0, len = boxList.length, ret;
+            if(len > 0){
+                for ( ; i < len; i += 1){
+                    if(Common.hasClass(boxList[i],classname)) {
+                        ret = boxList[i];
+                        return false;
+                    }
+                }
+            }
+            if(ret){
+                return ret;
+            }else{
+                var elem = document.createElement(tagname);
+                elem.className = classname;
+                Common.insertAfter(elem,obj);
+                return elem;
+            }
+        },
+        addMsg : function (obj,msg) {
+            obj.style.display = 'inline-block';
+            obj.innerHTML = msg;
+        },
+        bind : (function() {
 			if (window.addEventListener) {
 				return function(el, type, fn, capture) {
 					el.bindFn = {};
@@ -78,7 +119,8 @@
 			return new Validator(frmname,options);
 		}
 		this.options = Common.extend(defaults,options);
-		this.formobj = document.forms[frmname];
+//        console.log(typeof this.options.errShow); //打印errShow的类型
+        this.formobj = document.forms[frmname];
 		if(!this.formobj){
 			alert("找不到表单" + frmname);
 			return;
@@ -95,14 +137,14 @@
 		}
         formobj.onsubmit = function () {
             if(self.checkForm()){
+                self.showError();
                 return false;
             }else{
                 return formobj.oldSubmit();
             }
         }
         self.ruleData = []; //缓存验证规则
-        self.error = false; //是否有错误
-        self.listError = {}; //缓存错误信息
+        self.errObjList = {}; //缓存显示错误的obj对象
 	}
     Validator.prototype.addValidation = function () {
         var self = this, pos, rule, ruleExt, itemname, itemobj, data = {};
@@ -110,12 +152,19 @@
             Common.each(arguments[0],function(key,value){
                 itemname = value[0]; //获取表单的name值
                 itemobj = self.formobj[itemname]; //获取itemname对象
-
+                if(!itemobj){
+                    return 'break';
+                }
                 //判断rule是否有扩展值
                 pos = value[1].search('=');
                 if(pos >= 0){
                     rule = value[1].substring(0,pos);
                     ruleExt = value[1].substr(pos + 1);
+                    ruleExt = isNaN(ruleExt) ? ruleExt : parseInt(ruleExt);
+                    if(/^('|")\w+/.test(ruleExt)){
+                        ruleExt = ruleExt.replace(/['"]/g,"").split('|');
+                    }
+//                    console.log(ruleExt);
                 }else{
                     rule = value[1];
                 }
@@ -123,7 +172,7 @@
                     name: itemname,
                     obj : itemobj,
                     rule : rule,
-                    ruleExt : ruleExt || '',
+                    ruleExt : ruleExt !== false ? ruleExt : '',
                     msg : value[2] || ''
                 }
                 self.ruleData.push(data);
@@ -139,47 +188,216 @@
     }
 	Validator.prototype.checkForm = function () {
         var self = this;
+        self.errorHash = {}; //缓存错误的，哈希表
+        self.errorArray = []; //缓存错误的，数组
+        self.hideError(); //隐藏错误
         Common.each(self.ruleData,function(key,value){
-            self.checkSingle(value);
+            if(self.options.together){
+                //如果检测所有错误
+                self.checkSingle(value);
+            }else{
+                if(self.errorArray.length < 1){
+                    self.checkSingle(value);
+                }else{
+                    return 'break';
+                }
+            }
         });
-        return self.error;
+        return self.errorArray.length > 0 ? true : false ;
 	}
 
     Validator.prototype.checkSingle = function(data) {
         var self = this;
         if(Commands[data.rule]){
-            if(Commands[data.rule](data)){
-
-            }else{
-                alert (data.msg);
-                self.error = true; //有错误
-                //self.listError[data.name] = data.msg;
+            if(!Commands[data.rule].call(self,data)){
+                //如果验证没有通过，将这条记录缓存到错误列表
+                if(!self.errorHash[data.name]){
+                    self.errorHash[data.name] = true;
+                    self.errorArray.push(data);
+                }
             }
         }else{
-            self.error = true; //有错误
-            //self.listError['params'] = '参数定义错误';
+//            console.log(data.rule);
+            self.errorHash['V_params'] = true;
+            self.errorArray.push({
+                msg : '参数定义错误'
+            });
+        }
+    }
+    Validator.prototype.showError = function () {
+        var self = this, msgArray = [], split;
+
+        if(typeof self.options.errShow == 'function'){
+            //如果错误形式为函数的话，直接返回错误数组
+            self.options.errShow(self.errorArray);
+        }else{
+            switch(self.options.errShow){
+                case 'alert':
+                case 'multiple':
+                    Common.each(self.errorArray,function(key,value){
+                        msgArray.push(value.msg);
+                    });
+                    if(self.options.errShow == 'alert'){
+                        alert(msgArray.join('\n'));
+                    }else{
+                        self.showErrorBox(self.formobj,msgArray.join('<br/>'));
+                    }
+                    break;
+                case 'single':
+                    Common.each(self.errorArray,function(key,value){
+                        self.showErrorSingle(value);
+                    });
+                    break;
+            }
+        }
+    }
+    Validator.prototype.showErrorSingle = function (data){
+        var self = this, obj = data.obj, msg = data.msg, name = data.name;
+        if(!self.errObjList[name]){
+            if(obj.length){
+                obj = obj[obj.length-1];
+            }
+            self.errObjList[name] = Common.getErrBox(obj,'span','error_strings');
+        }
+        Common.addMsg(self.errObjList[name],msg);
+    }
+    Validator.prototype.showErrorBox = function (obj,msg) {
+        var self = this, divList = obj.parentNode.getElementsByTagName('div');
+        if(self.errGlobalObj){
+            self.errGlobalObj.innerHTML = msg;
+        }else{
+            for(var i = 0; i < divList.length; i += 1){
+                if(Common.hasClass(divList[i],'error_strings')){
+                    self.errGlobalObj = divList[i];
+                    Common.addMsg(self.errGlobalObj,msg);
+                    return false;
+                }
+            }
+            if(!self.errGlobalObj){
+                self.errGlobalObj = document.createElement('div');
+                self.errGlobalObj.className = 'error_strings';
+                self.errGlobalObj.innerHTML = msg;
+                Common.insertAfter(self.errGlobalObj,obj);
+            }
+        }
+    }
+    Validator.prototype.hideError = function () {
+        var self = this;
+        if(self.errGlobalObj){
+            self.errGlobalObj.style.display = 'none';
+        }
+        if(self.errObjList){
+            Common.each(self.errObjList,function(key,value){
+                value.style.display = 'none';
+            });
         }
     }
 
+
+    //command验证规则，进行非空的验证。如果为空不验证
     var Commands = {
         'required' : function (data) {
             return Test.isEmpty(data.obj.value) ? false : true ;
         },
         'maxlength' : function (data) {
-            return (data.obj.value.length > data.ruleExt) ? false : true ;
+            return Test.isEmpty(data.obj.value) ? true : data.obj.value.length < data.ruleExt ;
         },
         'minlength' : function (data) {
-            return (data.obj.value.length < data.ruleExt) ? false : true ;
+            return Test.isEmpty(data.obj.value) ? true : data.obj.value.length > data.ruleExt ;
         },
-        'allownum' : function (data) {
-            return /[\d]/.test(data.obj.value);
+        'number' : function (data) {
+            return Test.isEmpty(data.obj.value) ? true : /^[\d]+$/.test(data.obj.value);
+        },
+        'alpha' : function (data) {
+            return Test.isEmpty(data.obj.value) ? true : /^[A-Za-z]+$/.test(data.obj.value);
+        },
+        'string' : function (data) {
+            return Test.isEmpty(data.obj.value) ? true : /^\\w+$/.test(data.obj.value)
+        },
+        'email' : function (data) {
+            return Test.isEmpty(data.obj.value) ? true : /\w+((-w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+/.test(data.obj.value);
+        },
+        'telphone' : function (data) {
+            return Test.isEmpty(data.obj.value) ? true : /^[+]{0,1}(\d){1,3}[ ]?([-]?((\d)|[ ]){1,12})+$/.test(data.obj.value);
+        },
+        'mobile' : function (data) {
+            return Test.isEmpty(data.obj.value) ? true : /^0?1(3|5|8)\d{9}$/.test(data.obj.value);
+        },
+        'lessthan' : function (data) {
+            var compare = typeof data.ruleExt == 'number' ? data.ruleExt : parseInt(this.formobj[data.ruleExt].value);
+            return parseInt(data.obj.value) < compare;
+        },
+        'greaterthan' : function (data) {
+            var compare = typeof data.ruleExt == 'number' ? data.ruleExt : parseInt(this.formobj[data.ruleExt].value);
+            return parseInt(data.obj.value) > compare;
+        },
+        'equal' : function (data) {
+            var val = data.obj.value, ext = data.ruleExt, self = this;
+            return typeof ext == 'number' ?
+            (function(){
+                return parseInt(val) == ext ;
+            })() :
+            (function(){
+                if(ext.constructor === Array){
+                    var ret = true;
+                    for (var i = 0; i < ext.length; i += 1){
+                        if(val == ext[i]){
+                            ret = false;
+                            return false;
+                        }
+                    }
+                    return ret;
+                }else{
+                    return val == self.formobj[ext].value;
+                }
+            })();
+        },
+        'unequal' : function (data) {
+            var val = data.obj.value, ext = data.ruleExt, self = this;
+            return typeof ext == 'number' ?
+            (function(){
+                return parseInt(val) != ext ;
+            })() :
+            (function(){
+                if(ext.constructor === Array){
+                    var ret = true;
+                    for (var i = 0; i < ext.length; i += 1){
+                        if(val == ext[i]){
+                            ret = false;
+                            return false;
+                        }
+                    }
+                    return ret;
+                }else{
+                   return val != self.formobj[ext].value;
+                }
+            })();
+        },
+        'notselect' : function (data) {
+            var index = data.obj.selectedIndex;
+            return data.obj.value != data.ruleExt;
+        },
+        'shouldcheck' : function (data) {
+            var checkobj = data.obj, ret = false;
+            if (checkobj.length){
+                for (var i = 0; i < checkobj.length; i += 1) {
+                    if (checkobj[i].checked == true && checkobj[i].value == data.ruleExt){
+                        ret =  true;
+                    }
+                }
+            }else{
+                if (checkobj.checked == true){
+                    ret = true;
+                }
+            }
+            return ret;
         }
     }
 
     var Test = {
         trim : function(value) {
             //过滤前后空格
-            return value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+            return value.replace(/(^\s*)|(\s*$)/g,"");
         },
         isEmpty : function (value) {
             //是否为空的判断
@@ -190,7 +408,7 @@
             //checkbox,radio判断是否选中某个值
             if (objcheck.length){
                 for (var i = 0; i < objcheck.length; i += 1) {
-                    if (objcheck[c].checked == "1" && objcheck[c].value == value){
+                    if (objcheck[i].checked == "1" && objcheck[c].value == value){
                         return true;
                     }
                 }
@@ -213,138 +431,6 @@
             }
             return false;
         }
-    }
-
-
-    function validateInput(strValidateStr, objValue, strError)
-    {
-
-        switch (command)
-        {
-
-            case "alnum":
-            case "alphanumeric":
-            {
-                ret = TestInputType(objValue, "[^A-Za-z0-9]", strError, objValue.name + ": Only alpha-numeric characters allowed ");
-                break;
-            }
-            case "alnum_s":
-            case "alphanumeric_space":
-            {
-                ret = TestInputType(objValue, "[^A-Za-z0-9\\s]", strError, objValue.name + ": Only alpha-numeric characters and space allowed ");
-                break;
-            }
-            case "num":
-            case "numeric":
-            case "dec":
-            case "decimal":
-            {
-                if (objValue.value.length > 0 && !objValue.value.match(/^[\-\+]?[\d\,]*\.?[\d]*$/))
-                {
-                    sfm_show_error_msg(strError, objValue);
-                    ret = false;
-                } //if
-                break;
-            }
-            case "alphabetic":
-            case "alpha":
-            {
-                ret = TestInputType(objValue, "[^A-Za-z]", strError, objValue.name + ": Only alphabetic characters allowed ");
-                break;
-            }
-            case "alphabetic_space":
-            case "alpha_s":
-            {
-                ret = TestInputType(objValue, "[^A-Za-z\\s]", strError, objValue.name + ": Only alphabetic characters and space allowed ");
-                break;
-            }
-            case "email":
-            {
-                ret = TestEmail(objValue, strError);
-                break;
-            }
-            case "lt":
-            case "lessthan":
-            {
-                ret = TestLessThan(objValue, cmdvalue, strError);
-                break;
-            }
-            case "gt":
-            case "greaterthan":
-            {
-                ret = TestGreaterThan(objValue, cmdvalue, strError);
-                break;
-            }
-            case "regexp":
-            {
-                ret = TestRegExp(objValue, cmdvalue, strError);
-                break;
-            }
-            case "dontselect":
-            {
-                ret = TestDontSelect(objValue, cmdvalue, strError)
-                break;
-            }
-            case "dontselectchk":
-            {
-                ret = TestDontSelectChk(objValue, cmdvalue, strError)
-                break;
-            }
-            case "shouldselchk":
-            {
-                ret = TestShouldSelectChk(objValue, cmdvalue, strError)
-                break;
-            }
-            case "selmin":
-            {
-                ret = TestSelMin(objValue, cmdvalue, strError);
-                break;
-            }
-            case "selmax":
-            {
-                ret = TestSelMax(objValue, cmdvalue, strError);
-                break;
-            }
-            case "selone_radio":
-            case "selone":
-            {
-                ret = TestSelectOneRadio(objValue, strError);
-                break;
-            }
-            case "dontselectradio":
-            {
-                ret = TestSelectRadio(objValue, cmdvalue, strError, false);
-                break;
-            }
-            case "selectradio":
-            {
-                ret = TestSelectRadio(objValue, cmdvalue, strError, true);
-                break;
-            }
-            //Comparisons
-            case "eqelmnt":
-            case "ltelmnt":
-            case "leelmnt":
-            case "gtelmnt":
-            case "geelmnt":
-            case "neelmnt":
-            {
-                return TestComparison(objValue, cmdvalue, command, strError);
-                break;
-            }
-            case "req_file":
-            {
-                ret = TestRequiredInput(objValue, strError);
-                break;
-            }
-            case "file_extn":
-            {
-                ret = TestFileExtension(objValue, cmdvalue, strError);
-                break;
-            }
-
-        } //switch
-        return ret;
     }
 
 	window.Validator = Validator;
