@@ -1,4 +1,4 @@
-﻿(function(){
+(function(){
 	var defaults = {
 		together : false, //默认遇错误打断，显示单条错误信息
 		errShow : 'alert', //错误提示，默认为alert，支持字符串(alert,single,multiple),自定义function(string || array())
