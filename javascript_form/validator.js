@@ -31,6 +31,13 @@
                 }
             }
         },
+        inArray : function (val,arr) {
+            var i = 0, len = arr.length, ret = false, o = {};
+            for( ; i < len; i += 1) {
+                o[arr[i]] = true;
+            }
+            return o[val];
+        },
         hasClass : function (element,value) {
             var reg = new RegExp('(\\s|^)' + value + '(\\s|$)');
             return element.className.match(reg);
@@ -111,7 +118,12 @@
 					};
 				};
 			}
-		})()
+		})(),
+        isEmpty : function (value) {
+            //是否为空的判断
+            value = value.replace(/(^\s*)|(\s*$)/g,"");
+            return (value.length) == 0 ? true : false;
+        }
 	}
 
 	var Validator = function (frmname,options) {
@@ -145,6 +157,10 @@
         }
         self.ruleData = []; //缓存验证规则
         self.errObjList = {}; //缓存显示错误的obj对象
+
+        self.errorHash = {}; //缓存错误的，哈希表
+        self.errorArray = []; //缓存错误的，数组
+
 	}
     Validator.prototype.addValidation = function () {
         var self = this, pos, rule, ruleExt, itemname, itemobj, data = {};
@@ -178,9 +194,14 @@
                 self.ruleData.push(data);
                 if(self.options.timely){
                     //如果开启实时验证
-                    Common.bind(itemobj,'blur',function(){
-                        self.checkSingle(data);
-                    });
+                    (function(params){
+                        Common.bind(itemobj,'blur',function(){
+                            self.checkSingle(params);
+                            Common.each(self.errorArray,function(key,value){
+                                self.showErrorSingle(value);
+                            });
+                        });
+                    })(data);
                 };
             });
             console.log(self.ruleData);
@@ -254,7 +275,7 @@
     Validator.prototype.showErrorSingle = function (data){
         var self = this, obj = data.obj, msg = data.msg, name = data.name;
         if(!self.errObjList[name]){
-            if(obj.length){
+            if(obj.tagName != 'SELECT' && obj.length){
                 obj = obj[obj.length-1];
             }
             self.errObjList[name] = Common.getErrBox(obj,'span','error_strings');
@@ -297,31 +318,31 @@
     //command验证规则，进行非空的验证。如果为空不验证
     var Commands = {
         'required' : function (data) {
-            return Test.isEmpty(data.obj.value) ? false : true ;
+            return Common.isEmpty(data.obj.value) ? false : true ;
         },
         'maxlength' : function (data) {
-            return Test.isEmpty(data.obj.value) ? true : data.obj.value.length < data.ruleExt ;
+            return Common.isEmpty(data.obj.value) ? true : data.obj.value.length < data.ruleExt ;
         },
         'minlength' : function (data) {
-            return Test.isEmpty(data.obj.value) ? true : data.obj.value.length > data.ruleExt ;
+            return Common.isEmpty(data.obj.value) ? true : data.obj.value.length > data.ruleExt ;
         },
         'number' : function (data) {
-            return Test.isEmpty(data.obj.value) ? true : /^[\d]+$/.test(data.obj.value);
+            return Common.isEmpty(data.obj.value) ? true : /^[\d]+$/.test(data.obj.value);
         },
         'alpha' : function (data) {
-            return Test.isEmpty(data.obj.value) ? true : /^[A-Za-z]+$/.test(data.obj.value);
+            return Common.isEmpty(data.obj.value) ? true : /^[A-Za-z]+$/.test(data.obj.value);
         },
         'string' : function (data) {
-            return Test.isEmpty(data.obj.value) ? true : /^\\w+$/.test(data.obj.value)
+            return Common.isEmpty(data.obj.value) ? true : /^\\w+$/.test(data.obj.value)
         },
         'email' : function (data) {
-            return Test.isEmpty(data.obj.value) ? true : /\w+((-w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+/.test(data.obj.value);
+            return Common.isEmpty(data.obj.value) ? true : /\w+((-w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+/.test(data.obj.value);
         },
         'telphone' : function (data) {
-            return Test.isEmpty(data.obj.value) ? true : /^[+]{0,1}(\d){1,3}[ ]?([-]?((\d)|[ ]){1,12})+$/.test(data.obj.value);
+            return Common.isEmpty(data.obj.value) ? true : /^[+]{0,1}(\d){1,3}[ ]?([-]?((\d)|[ ]){1,12})+$/.test(data.obj.value);
         },
         'mobile' : function (data) {
-            return Test.isEmpty(data.obj.value) ? true : /^0?1(3|5|8)\d{9}$/.test(data.obj.value);
+            return Common.isEmpty(data.obj.value) ? true : /^0?1(3|5|8)\d{9}$/.test(data.obj.value);
         },
         'lessthan' : function (data) {
             var compare = typeof data.ruleExt == 'number' ? data.ruleExt : parseInt(this.formobj[data.ruleExt].value);
@@ -374,64 +395,103 @@
             })();
         },
         'notselect' : function (data) {
-            var index = data.obj.selectedIndex;
-            return data.obj.value != data.ruleExt;
+            return data.obj.tagName == 'SELECT' ? (function(){
+                var index = data.obj.selectedIndex;
+                return data.obj.options[index].value != data.ruleExt;
+            })() :
+            (function(){
+                var objArr = data.obj, ret = true;
+                if (objArr.length){
+                    if(data.ruleExt && data.ruleExt.constructor === Array){
+                        checklen = data.ruleExt.length;
+                        for (var i = 0; i < objArr.length; i += 1) {
+                            if (objArr[i].checked == true && Common.inArray(objArr[i].value,data.ruleExt)){
+                                ret = false;
+                                return false;
+                            }
+                        }
+                    }else{
+                        for (var i = 0; i < objArr.length; i += 1) {
+                            if (objArr[i].checked == true){
+                                if(data.ruleExt === undefined){
+                                    ret = false;
+                                    return false;
+                                }else if(objArr[i].value == data.ruleExt){
+                                    ret = false;
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }else{
+                    if (objArr.checked == true){
+//                        objArr.value == data.ruleExt 一个对象时，是否判断是否等于设置的值
+                        ret = false;
+                    }
+                }
+
+                return ret;
+            })();
         },
-        'shouldcheck' : function (data) {
-            var checkobj = data.obj, ret = false;
-            if (checkobj.length){
-                for (var i = 0; i < checkobj.length; i += 1) {
-                    if (checkobj[i].checked == true && checkobj[i].value == data.ruleExt){
-                        ret =  true;
+        'shouldselect' : function (data) {
+            var objArr = data.obj, ret = false, checklen = 0, retNum = 0;
+            if (objArr.length){
+                if(data.ruleExt && data.ruleExt.constructor === Array){
+                    checklen = data.ruleExt.length;
+                    for (var i = 0; i < objArr.length; i += 1) {
+                        if (objArr[i].checked == true && Common.inArray(objArr[i].value,data.ruleExt)){
+                            retNum += 1;
+                        }
+                    }
+                    ret = (checklen === retNum)?true:false;
+                }else{
+                    for (var i = 0; i < objArr.length; i += 1) {
+                        if (objArr[i].checked == true){
+                            if(data.ruleExt === undefined){
+                                ret = true;
+                            }else if(objArr[i].value == data.ruleExt){
+                                ret = true;
+                            }
+                        }
                     }
                 }
             }else{
-                if (checkobj.checked == true){
+                if (objArr.checked == true){
                     ret = true;
                 }
             }
             return ret;
-        }
+        },
+		'minselect' : function (data) {
+			var objArr = data.obj, checklen = 0;
+			if(objArr.length){
+				for(var i = 0; i < objArr.length; i += 1) {
+					if(objArr[i].checked == true) {
+						checklen += 1;
+					}
+				}
+			}else{
+				if (objArr.checked == true){
+                    checklen += 1;
+                }
+			}
+			return checklen >= data.ruleExt;
+		},
+		'maxselect' : function (data) {
+			var objArr = data.obj, checklen = 0;
+			if(objArr.length){
+				for(var i = 0; i < objArr.length; i += 1) {
+					if(objArr[i].checked == true) {
+						checklen += 1;
+					}
+				}
+			}else{
+				if (objArr.checked == true){
+                    checklen += 1;
+                }
+			}
+			return checklen <= data.ruleExt;
+		}
     }
-
-    var Test = {
-        trim : function(value) {
-            //过滤前后空格
-            return value.replace(/(^\s*)|(\s*$)/g,"");
-        },
-        isEmpty : function (value) {
-            //是否为空的判断
-            value = Test.trim(value);
-            return (value.length) == 0 ? true : false;
-        },
-        isChecked : function (objcheck,value) {
-            //checkbox,radio判断是否选中某个值
-            if (objcheck.length){
-                for (var i = 0; i < objcheck.length; i += 1) {
-                    if (objcheck[i].checked == "1" && objcheck[c].value == value){
-                        return true;
-                    }
-                }
-            }else{
-                if (objcheck.checked == "1")
-                {
-                    return true;
-                }
-            }
-            return false;
-        },
-        isSelected : function (objselect,value) {
-            //select下拉选择
-            for (var i = 0; i < objselect.options.length; i++)
-            {
-                if (objselect.options[i].selected == true && objselect.options[i].value == value)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-
 	window.Validator = Validator;
 })();

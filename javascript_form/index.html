@@ -8,11 +8,11 @@
 html,body,div,form,ul,li{margin:0;padding:0;font-size: 12px;}
 ul{list-style: none;}
 
-.error_strings{margin:20px;padding:20px;background: #ececec;color: #db4f33;line-height: 20px;font-size: 12px;margin-left: 500px;width:200px;}
+.error_strings{margin:20px;padding:20px;background: #ececec;color: #db4f33;line-height: 20px;font-size: 12px;margin-left: 600px;width:200px;}
 
         /*form list start*/
 
-#myform{width: 500px;float:left;}
+#myform{width: 600px;float:left;}
 .formList{margin-left: 100px;}
         .formList li{padding:7px   0;position:relative;display: block;}
         .formList li label{width:200px;text-align:right;padding:5px 20px 0px 0px;color:#333;font-weight:500;}
@@ -113,19 +113,56 @@ ul{list-style: none;}
             <li>
                 <label>不能选择第一项0</label>
                 <span>
-                    <select name="notselect">
+                    <select name="select">
                         <option value="0">请选择</option>
-                        <option value="1">选我吧</option>
+                        <option value="1s">选我吧</option>
                         <option value="2">选谁呀</option>
                     </select>
                 </span>
             </li>
 
             <li>
-                <label>必须选中</label>
+                <label>必须选中第一个，不能选3</label>
                 <span>
-                    是<input type="checkbox" name="checkNum" value="1" />
-                    否<input type="checkbox" name="checkNum" value="2" />
+                    是人<input type="checkbox" name="checkNum" value="1" />
+                    作家<input type="checkbox" name="checkNum" value="2" />
+                    不是人<input type="checkbox" name="checkNum" value="3" />
+                </span>
+            </li>
+
+            <li>
+                <label>必须选中第1,3个</label>
+                <span>
+                    中国<input type="checkbox" name="checkMore" value="1" />
+                    石头<input type="checkbox" name="checkMore" value="2" />
+                    北京<input type="checkbox" name="checkMore" value="3" />
+                    三里屯<input type="checkbox" name="checkMore" value="4" />
+                </span>
+            </li>
+
+			<li>
+                <label>选中数大于2，小于4（不能选择1,2）</label>
+                <span>
+                    第一项<input type="checkbox" name="checkLen" value="1" />
+                    第二项<input type="checkbox" name="checkLen" value="2" />
+					第三项<input type="checkbox" name="checkLen" value="3" />
+					第四项<input type="checkbox" name="checkLen" value="4" />
+					第五项<input type="checkbox" name="checkLen" value="5" />
+					第六项<input type="checkbox" name="checkLen" value="6" />
+                    第七项<input type="checkbox" name="checkLen" value="7" />
+                </span>
+            </li>
+
+            <li>
+                <label>必选，不能选中3</label>
+                <span>
+
+                    第一项<input type="radio" name="checkRadio" value="1" />
+                    第二项<input type="radio" name="checkRadio" value="2" />
+					第三项<input type="radio" name="checkRadio" value="3" />
+					第四项<input type="radio" name="checkRadio" value="4" />
+					第五项<input type="radio" name="checkRadio" value="5" />
+					第六项<input type="radio" name="checkRadio" value="6" />
                 </span>
             </li>
 
@@ -149,13 +186,14 @@ ul{list-style: none;}
 //});
 
 document.forms['myform'].onsubmit = function(){
-	alert ('ssssss');
+	alert ('已经通过验证，要进行提交操作');
     return false;
 }
 
 var f = Validator('myform',{
     together : true, //一起显示
-    errShow : 'single' //单独显示
+    errShow : 'single', //单独显示
+    timely : true //开启实时验证
 });
 f.addValidation([
     ["username","required",'姓名必填'],
@@ -176,8 +214,15 @@ f.addValidation([
     ["unequalPrev","unequal=unequalNum",'不能等于上面'],
     ["unequalArr","unequal='11|22|33'",'不能等于11,22,33'],
     ["unequalArrStr","unequal='aa|bb|cc'",'不能等于aa,bb,cc'],
-    ["notselect","notselect=000",'不能选择第一项0'],
-    ["checkNum","shouldcheck=1",'必须选中这个']
+    ["select","notselect=0",'不能选择第一项0'],
+    ["checkNum","notselect=3",'不能选3'],
+    ["checkNum","shouldselect=1",'必须选中第一个'],
+    ["checkMore","shouldselect='1|3'",'必须选中1,3'],
+    ["checkLen","notselect='1|2'",'不能选择1,2'],
+    ["checkLen","minselect=2",'选中不能少于2项'],
+	["checkLen","maxselect=4",'选中不能大于4项'],
+    ["checkRadio","shouldselect",'必须选泽这里'],
+    ["checkRadio","notselect=3",'不能选中第三项']
 ]);
 
 
