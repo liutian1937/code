@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+    <title>eraser effect</title>
+    <style>
+    html,body{margin:0;padding:0;}
+    
+    
+    .imgWrap{
+        width:100%;
+        height:200px;
+        overflow:hidden;
+        position:relative;
+    }
+    .imgWrap ul{
+        width:100%;
+        height:100%;
+        position:relative;
+        margin:0;
+        padding:0;
+        list-style:none;
+        -webkit-transition: 500ms cubic-bezier(0.39, 0.575, 0.565, 1);
+        transition: 500ms cubic-bezier(0.39, 0.575, 0.565, 1);
+    }
+    
+    .imgWrap ul li{
+        width:100%;
+        height:100%;
+        position:absolute;
+        left:0;
+        top:0;
+    }
+    .imgWrap ul li img{
+        width:100%;
+        height:100%;
+    }
+    
+
+    .circle{text-align:center;position:absolute;width:100%;bottom:10px;z-index:10;}
+    .circle span{width:6px;height:6px;background:rgba(0,0,0,0.1);border:2px solid #333;border-radius:10px;display:inline-block;margin:0 5px;}
+    .circle .cur{background:#fff;}
+    </style>
+</head>
+<body>
+
+<div id="res" style="height:50px;"></div>
+
+<div style="width:100%">
+    
+
+    <div id="imgWrap" class="imgWrap">
+        <ul>
+            <li><img src="0.jpg" /></li>
+            <li><img src="1.jpg" /></li>
+            <li><img src="2.jpg" /></li>
+            <li><img src="1.jpg" /></li>
+        </ul>
+    </div>
+    
+    
+    <input type="button" value="prev" onclick="prev()" />
+    <input type="button" value="next" onclick="next()" />
+    
+</div>
+
+
+    
+   
+
+</body>
+
+<script type="text/javascript">
+
+;(function(){
+    //获取兼容性的触控事件
+    var isTouch = 'ontouchstart' in window ,
+    Touch = {
+        start : isTouch ? 'touchstart' : 'mousedown',
+        move  : isTouch ? 'touchmove' : 'mousemove',
+        end : isTouch ? 'touchend' : 'mouseup'
+    },Unit = (function () {
+		var style = document.documentElement.style, self = {};
+		//each函数，封装for循环
+		function _each (arr, fn) {
+			var i = 0, len = arr.length;
+			for (;i < len; i += 1 ) {
+				fn(arr[i]);
+			};
+		};
+		//获取css3前缀
+		var _prefix = (function () {
+			var head = ['t', 'webkitT', 'MozT', 'msT', 'OT'], transform, ret;
+			_each(head, function (val) {
+				transform = val + 'ransform';
+				if (transform in style) {
+					ret = val.substr(0,val.length - 1);
+				}
+			});
+			return ret;
+		})();
+		//扩展函数，克隆对象属性
+		self.extend = function (target, obj) {
+			for (var i in obj) {
+				target[i] = obj[i];
+			}
+		};
+		//拼接css3属性，并返回
+		function _prefixStyle (style) {
+			if ( _prefix === '' ) return style;
+			if (! _prefix ) return false;
+			return _prefix + style.charAt(0).toUpperCase() + style.substr(1);
+		};
+
+		self.extend(self, {
+			css3 : _prefixStyle('transition'),
+			Transform : _prefixStyle('transform'),
+			Property : _prefixStyle('transitionProperty'),
+			Duration : _prefixStyle('transitionDuration'),
+			TimingFunction : _prefixStyle('transitionTimingFunction')
+		});
+		return self;
+	})(),
+    Common = {
+        css : function (elem,val){
+            var data;
+            for(var attr in val){
+                data = val[attr];
+                attr = (attr == 'transform') ? Unit.Transform : attr;
+				if(attr in elem.style){
+					elem.style[attr] = data;
+				}
+			};
+        },
+        bind : (function(){
+            if(window.addEventListener){
+                return function(elem,type,fn){
+                    elem.addEventListener(type,function(e){
+                        fn(e);
+                    },false);
+                }
+            }else if(window.attachEvent){
+                return function(elem,type,fn){
+                    elem.attachEvent('on'+type,function(e){
+                        fn(e);
+                    });
+                }
+            }
+        })(),
+        each : function (arr,fn) {
+            var i = 0, len = arr.length;
+            for ( ;i < len; i += 1 ) {
+				fn(i,arr[i]);
+			};
+        },
+        getId : function (id) {
+            return document.getElementById(id);
+        },
+        getWidth : function (elem) {
+            if(elem.style.width)return parseInt(elem.style.width);
+            if(elem.offsetWidth)return parseInt(elem.offsetWidth);
+            if(elem.currentStyle)return parseInt(elem.currentStyle.width);  
+            if(document.defaultView && document.defaultView.getComputedStyle){
+                return parseInt(document.defaultView.getComputedStyle(elem,"").getPropertyValue("width"));
+            }
+        },
+        stopDefault : function (e){
+            e = e || window.event;
+			if(e && e.preventDefault){
+			　　e.preventDefault();
+			}else{
+			　　e.returnValue=false;
+			}
+        },
+        getTime : function () {
+			return Date.now() || new Date().getTime() ;
+		},
+        pos : (function () {
+            if(isTouch){
+                return function(e){
+                    return {
+                        x : e.screenX,
+                        y : e.screenY
+                    }
+                }
+            }else{
+                return function(e){
+                    return {
+                        x : e.pageX,
+                        y : e.pageY
+                    }
+                }
+            }
+        })()
+    };
+    
+    var slider = function (params) {
+        if(!(this instanceof slider)){
+            return new slider(params);
+        }
+        this.init(params);
+    };
+    slider.prototype = {
+        constructor : slider,
+        init : function (params) {
+            var self = this;
+            self.dom = params.elem || Common.getId('imgWrap')
+            //操作移动的element
+            self.elem = self.dom.getElementsByTagName('ul')[0];
+            //每个dom子类
+            self.child = self.elem.getElementsByTagName('li');
+            //动态生成circle
+            self.circle = self._makeElem('circle');
+            //计算有几个item
+            self.len = self.child.length;
+            //item的宽度    
+            self.width = Common.getWidth(self.elem);
+            //当前的选中
+            self.current = 0;
+            //当前是否处于移动状态
+            self.isMove = false;
+            
+            //缓存当前的位置
+            self.location = self.tempLocation  = {};
+            
+            self.timer = null;
+            
+            //触摸开始时间
+            self.startTime = null;
+            
+            self._initFn();
+            
+            if(params.auto){                
+                //动画时间间隔
+                self.interval = params.interval || 7000;
+                self._auto('play');
+            }
+        },
+        _makeElem : function (name) {
+            var elem = document.createElement('div'), self = this;
+            elem.className = name;
+            self.dom.appendChild(elem);
+            return elem;
+        },
+        _initFn : function () {
+            var self = this,
+                width = self.width,
+                frag = document.createDocumentFragment();
+            
+            //设置item位置
+            Common.each(this.child,function(key,val){
+                //item left position
+                Common.css(val,{
+                    left : width*key + 'px'
+                });
+                //添加circle
+                var o = document.createElement('span');
+                o.setAttribute('data-index',key);
+                frag.appendChild(o);
+            });
+            self.circle.appendChild(frag);
+            
+            //circle 绑定点击事件
+            Common.bind(self.circle,Touch.end,function(e){
+                var target = e.target || e.srcElement,
+                    direction = false,
+                    index;
+                if(target.tagName.toLowerCase() == 'span'){
+                    index = parseInt(target.getAttribute('data-index'));
+                    self.current = index;
+                    self._scroll();
+                }
+            });
+            
+            //move激活
+            Common.bind(self.elem,Touch.start,function(e){
+                if(e.button == 2){
+                    return false;
+                }
+                self._start(e);
+            });
+            //move移动
+            Common.bind(window,Touch.move,function(e){
+                self._move(e)
+            });
+            
+            //move结束
+            Common.bind(window,Touch.end,function(e){
+                self._end(e);
+            });
+            
+            self._setCurrent();
+        },
+        _start : function (e) {
+            var self = this;
+            self.location = self.tempLocation = isTouch ? Common.pos(e.touches[0]) : Common.pos(e);
+            //移动激活
+            self.isMove = true;
+            self.startTime = Common.getTime();
+            self._auto('stop');
+        },
+        _move : function (e) {
+            if(!this.isMove){
+                return false;
+            }
+            var self = this, timeStamp;
+            Common.stopDefault(e);
+            var position = isTouch ? Common.pos(e.touches[0]) : Common.pos(e),
+                distance;
+            distance = position.x - this.location.x;
+            
+            //边界问题
+            if( -distance - 50 > (this.len - this.current -1)*this.width){
+                return false;
+            }
+            if(distance - 50 > this.current * this.width){
+                return false;
+            }
+            
+            //时间戳，如果大于300自动清空一次
+            timeStamp = Common.getTime();
+            if(timeStamp - self.startTime > 300){
+				self.startTime = timeStamp;
+                self.tempLocation = position;
+			}
+            
+            //移动开始
+            this._translate(distance);
+        },
+        _end : function (e) {
+            if(!this.isMove){
+                return false;
+            };
+            var self = this,
+                position = isTouch ? Common.pos(e.changedTouches[0]) : Common.pos(e),
+                distance = position.x - self.location.x,
+                tempPer,
+                minus,
+                direction,
+                time,
+                speed;
+                
+                self.isMove = false;
+                self.elem.style[Unit.Duration] = '300ms';
+                
+                tempPer = parseInt(distance/self.width);
+                minus =  distance - tempPer*self.width;
+                        
+                if(distance > 0){
+                    self.current -= minus > self.width/2 ? tempPer + 1 : tempPer;
+                }else if(distance < 0){
+                    self.current -= minus < -self.width/2 ? tempPer - 1 : tempPer;
+                };
+                
+                if(self.current > self.len - 1){
+                    self.current = self.len - 1
+                }else if(self.current < 0){
+                    self.current = 0 ;
+                };
+                
+                //计算flick 的时间和速度
+                time = Common.getTime() - self.startTime;
+                speed = Math.abs(position.x - self.tempLocation.x)/time;
+                if(Common.getTime() - self.startTime < 200 && speed > 0.5){
+                    if(distance > 0 && self.current !== 0){
+                        this._scroll('prev');
+                    }else if(distance < 0 && self.current !== self.len - 1){
+                        this._scroll('next');
+                    }else{
+                        this._scroll();
+                    }
+                }else{
+                    this._scroll();    
+                }
+                this._setCurrent();
+                self._auto('play');
+        },
+        _translate : function (distance){
+            var self = this;
+            distance = distance - this.current*this.width;
+            this.elem.style[Unit.Duration] = '50ms';
+            Common.css(this.elem,{
+                transform : 'translate3d('+distance+'px,0,0)'
+            });
+        },
+        _scroll : function (direction) {
+            var self = this;
+            //根据方向move
+            if(direction == 'next'){
+                self.current = self.current < self.len -1 ? self.current + 1 : 0;
+            }else if(direction == 'prev'){
+                self.current = self.current > 0 ? self.current -1 : self.len -1;
+            };
+
+            //设置translate3d 样式
+            Common.css(self.elem,{
+                transform : 'translate3d(-'+self.current*self.width+'px,0,0)'
+            });
+            //设置circle选中
+            this._setCurrent();
+        },
+        _setCurrent : function () {
+            var cur = this.current;            
+            Common.each(this.circle.getElementsByTagName('span'),function(key,val){
+                if(key == cur){
+                    val.className = 'cur';
+                }else{
+                    val.className = '';
+                }
+            });
+        },
+        _auto : function (type) {
+            var self = this;
+            if(type == 'play'){
+                self.timer = setTimeout(function(){
+                    self._scroll('next');
+                    self._auto('play');
+                },self.interval)
+            }else if(type == 'stop'){
+                clearTimeout(self.timer);
+            }
+        },
+        next : function () {
+            this._scroll('next');
+        },
+        prev : function () {
+            this._scroll('prev');
+        }
+    }
+    window.ImgSlider = slider;
+})();
+
+var a = ImgSlider({
+    par : document.getElementById('imgWrap'),
+    auto : true,
+    interval : 5000
+});
+
+function next(){
+    a.next();
+}
+function prev(){
+    a.prev();
+}
+</script>
+</html> 

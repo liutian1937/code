@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F5</title>
+    <style>
+    html,body{margin:0;padding:0;height:100%;width:100%;-webkit-overflow-touch:none;}
+    
+    </style>
+</head>
+<body>
+
+<div id="b" style="margin-top:10px;"></div>
+
+<script>
+;(function(){
+    var isTouch = 'ontouchstart' in window,
+        events = {
+            start : isTouch ? 'touchstart' : 'mousedown',
+            move : isTouch ? 'touchmove' : 'mousemove',
+            end : isTouch ? 'touchend' : 'mouseup'
+        };
+    var ScratchCard = function (params) {
+        if( !(this instanceof ScratchCard) ) {
+            return new ScratchCard(params);
+        };
+        this._init(params);
+    };
+    ScratchCard.prototype = {
+        constructor : ScratchCard ,
+        _init : function (params) {
+            var _this = this, 
+                ret = _this._createCanvas(params);
+                
+            _this.canvas = ret.canvas;
+            _this.ctx = ret.ctx;
+
+            _this.pos = _this._getPos(_this.canvas);
+            _this.canvas.style.backgroundImage = 'url(pic.jpg)';
+            
+            //圆的半径
+            _this.radius = params.radius || 10;
+            //区域宽高
+            _this.width = params.width;
+            _this.height = params.height;
+            
+            _this.percent = params.percent || 60;
+            
+            //事件监听
+            _this._listen();
+        },
+        _createCanvas : function (params) {
+            var canvas = document.createElement('canvas'),
+                ctx = canvas.getContext('2d');
+            
+            canvas.width = params.width;
+            canvas.height = params.height;
+            
+            params.dom.appendChild(canvas);
+            if(params.type == 'image'){
+                var img = new Image();
+                img.src = params.src;
+                img.onload = function () {
+                    ctx.drawImage(img,0,0);
+                }
+            }else if(params.type == 'color'){
+                ctx.fillStyle = params.color;
+                ctx.fillRect(0,0,params.width,params.height);
+            }
+            return {
+                canvas : canvas,
+                ctx : ctx
+            }
+            
+        },
+        _listen : function () {
+            var _this = this;
+            _this.enableMove = false;
+            _this.canvas.addEventListener(events.start,function(e){
+                _this._start(e);
+            },false);
+            _this.canvas.addEventListener(events.move,function(e){
+                _this._move(e);
+            },false);
+            document.body.addEventListener(events.end,function(e){
+                _this._end(e);
+            },false);
+        },
+        _start : function (e) {
+            var _this = this,x,y;
+            _this.enableMove = true;
+            e = isTouch ? e.touches[0] : e;
+            x = e.pageX;
+            y = e.pageY;
+            _this._clear(x,y);
+            
+            
+        },
+        _move : function (e) {
+            var _this = this,x,y;
+            e.preventDefault();
+            e = isTouch ? e.touches[0] : e;
+            x = e.pageX;
+            y = e.pageY;
+            if(_this.enableMove){
+                _this._clear(x,y);
+            }
+        },
+        _end : function (e) {
+            var _this = this;
+            _this.enableMove = false;
+            _this.ctx.closePath();
+            
+            var data = _this.ctx.getImageData(0,0,_this.width,_this.height).data, len = data.length, i = 0, percent,count = 0;
+            for(; i < len; i+=4){
+				if (data[i + 3] === 0 ) {
+					count++;
+				}
+			}
+			percent = (count*4/len)*100;
+            if(percent > _this.percent){
+                _this._finish();
+            }
+        },
+        _finish : function () {
+            alert('over');
+        },
+        _clear : function (x,y) {
+            var _this = this, ctx = _this.ctx;
+            //x = x - _this.radius;
+            //y = y - _this.radius;
+            x = x - _this.pos.left;
+            y = y - _this.pos.top;
+            
+            ctx.fillStyle = '#0f0';
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.moveTo(x,y);
+            ctx.arc(x,y,_this.radius,0,Math.PI*2,false);
+            ctx.fill();
+        },
+        _getPos : function (obj) {
+            var _this= this;
+            return  obj.offsetParent ? 
+                    (function(){
+                        var ret = _this._getPos(obj.offsetParent);
+                        return {
+                            left : obj.offsetLeft + ret.left,
+                            top : obj.offsetTop + ret.top
+                        }
+                    })() : 
+                    {
+                        left : obj.offsetLeft, 
+                        top : obj.offsetTop
+                    };
+        }
+    };
+    
+    window.ScratchCard = ScratchCard;
+})();
+
+ScratchCard({
+    dom : document.body,
+    width : 600,
+    height : 450,
+    radius : 20,
+    type : 'color',
+    color : '#ddd',
+    src : 'pic.png',
+    percent : 60
+});
+</script>
+</body>
+</html> 
