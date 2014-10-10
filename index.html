@@ -20,7 +20,7 @@
     <div style="background:#ddd;color:#000;font-size:24px;" id="mydiv">通过跨域操作修改这里的dom内容</div>
 
 <form method="get" action="/location.html" target="wypls"></form>
-<iframe src="" name="wyplus" id="myframe" style="width:100%;"></iframe>
+<iframe src="" name="wyplus" style="width:100%;"></iframe>
 
 
 <input type="button" value="唤醒网银+" style="margin-top:50px;width:100px;height:40px;line-height:40px;background:#db4f33;color:#fff;" 
@@ -30,7 +30,7 @@ id="button" onclick="submit()" />
     
     var elem = document.getElementById('mydiv'),
     btn = document.getElementById('button'),
-    frame = document.getElementById('myframe'),
+    frame = document.getElementsByTagName('iframe')[0],
     url = 'https://www.wangyin.com/wangyinActivity/666.htm',
     change = function(content){
       elem.innerHTML = content;
