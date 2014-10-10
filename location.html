@@ -37,6 +37,7 @@ window.onload = function(){
     
     var type = getPar('type'), content;
     if(type == 'change'){
+      content = getPar('content');
       parent.parent.change(content);
     }else if(type == 'close'){
       parent.parent.close();
