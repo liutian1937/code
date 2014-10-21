@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+<a href="javascript:;"  id="share">分享</a>
+<script>
+window.onload = function(){
+	var oShare = document.getElementById('share'),
+	json ={			//分享红包
+		imgUrl: "https://static.wangyin.com/member/v1.0.5/img/coffer-intro.png",
+        	lineLink: 'https://www.baidu.com',       //红包地址
+        	shareTitle : '京东网银钱包红包来啦',
+        	descContent : '迎京东双11，京东网银钱包给了我11个红包，分你一个！',
+        	appid : 'wx7941145208535b53'
+	};
+
+	oShare.onclick = function(){
+		var ifr = document.createElement('iframe'),
+			ifrSrc= 'openApp.jdMobile://virtual?params={"category":"jump","des":"share","title":"'+json.shareTitle+'","content":"'+json.descContent+'","imageUrl":"'+json.imgUrl+'","shareUrl":"'+json.lineLink+'"}';
+			ifr.src = ifrSrc;
+			ifr.style.display = 'none';
+			document.body.appendChild(ifr);
+			setTimeout(function() {
+				document.body.removeChild(ifr);
+			}, 1000);
+	}
+}
+</script>
+</body>
+</html>
